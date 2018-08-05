@@ -72,7 +72,8 @@ class UsersController extends Controller
 
         //return view('admin.layouts.template');
         //return view('admin.user.lists');
-        $mods = UserMod::paginate(10);
+        
+        $mods = UserMod::orderby('id','desc')->paginate(10);
         return view('admin.user.lists',compact('mods'));
 
     }
@@ -84,7 +85,7 @@ class UsersController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.user.create');
     }
 
     /**
@@ -98,11 +99,50 @@ class UsersController extends Controller
         //เซฟดาต้าเบส
         //dd($request);
         //exit;
-        $mod = new UserMod;
+        /*$mod = new UserMod;
         $mod->name = $request->name;
         $mod->email = $request->email;
         $mod->password = bcrypt($request->password);
+        $mod->save();*/
+
+       /* $mod = new UserMod;
+        $mod->email    = $request->email;
+        $mod->password = bcrypt($request->password);
+        $mod->name     = $request->name;
+        $mod->surname  = $request->surname;
+        $mod->mobile   = $request->mobile;
+        $mod->age      = $request->age;
+        $mod->address  = $request->address;
+        $mod->city     = $request->city;
+        $mod->save();*/
+
+        request()->validate([
+            'name' => 'required|min:2|max:50', //ต้องใส่ค่าถึงจะให้ผ่าน
+            'surname' => 'required|min:2|max:50',
+            'mobile' => 'required|numeric',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'age' => 'required|numeric',
+            'confirm_password' => 'required|min:6|max:20|same:password',
+        ], [
+            'name.required' => 'Name is required',
+            'name.min' => 'Name must be at least 2 characters.',
+            'name.max' => 'Name should not be greater than 50 characters.',
+        ]);
+
+
+        $mod = new UserMod;
+        $mod->email    = $request->email;
+        $mod->password = bcrypt($request->password);
+        $mod->name     = $request->name;
+        $mod->surname  = $request->surname;
+        $mod->mobile   = $request->mobile;
+        $mod->age      = $request->age;
+        $mod->address  = $request->address;
+        $mod->city     = $request->city;
         $mod->save();
+        return redirect('admin/users')
+                    ->with('success', 'User ['.$request->name.'] created successfully.');
 
 
     }
@@ -151,7 +191,8 @@ class UsersController extends Controller
      */
     public function edit($id)
     {
-        //
+        $item = UserMod::find($id);
+        return view('admin.user.edit',compact('item'));
     }
 
     /**
@@ -165,12 +206,39 @@ class UsersController extends Controller
 
     {
         
-        $mod = UserMod::find($id);           
+        /*$mod = UserMod::find($id);           
         $mod->name = $request->name;
         $mod->email = $request->email;
         $mod->password = bcrypt($request->password);
         $mod->save();
-        echo "Update Success";
+        echo "Update Success";*/
+
+         request()->validate([
+            'name' => 'required|min:2|max:50',
+            'surname' => 'required|min:2|max:50',
+            'mobile' => 'required|numeric',
+            'age' => 'required|numeric',
+        ], [
+            'name.required' => 'Name is required',
+            'name.min' => 'Name must be at least 2 characters.',
+            'name.max' => 'Name should not be greater than 50 characters.',
+        ]);
+
+        $mod = UserMod::find($id);
+        $mod->name     = $request->name;
+        $mod->surname  = $request->surname;
+        //$mod->email    = $request->email;
+        $mod->mobile   = $request->mobile;
+        $mod->surname  = $request->surname;
+        $mod->age      = $request->age;
+        $mod->address  = $request->address;
+        $mod->city     = $request->city;
+        $mod->save();
+        
+        //view('admin.user.create')
+
+        return redirect('admin/users')
+                    ->with('success', 'User ['.$request->name.'] updated successfully.');
 
     }
 
@@ -186,4 +254,10 @@ class UsersController extends Controller
         $mod->delete();
         echo "Delete Success";
     }
+   
+       
+       
+    
+
+
 }
